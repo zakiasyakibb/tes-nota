@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azky Studio (NOTA)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        indigo: {
+                            50: '#f0f4f9',
+                            100: '#dde7f3',
+                            200: '#c1d5eb',
+                            300: '#96b8dd',
+                            400: '#6493ca',
+                            500: '#4172b3',
+                            600: '#123E73', /* Warna utama #123E73 */
+                            700: '#0f3360',
+                            800: '#0d2a4f',
+                            900: '#0b213e',
+                            950: '#061224',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Print optimization styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printArea, #printArea * {
+                visibility: visible;
+            }
+            #printArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: white !important;
+                color: black !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* Toast animation */
+        @keyframes slideIn {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans flex flex-col pb-12">
+
+    <!-- Top Bar Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 no-print shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-200">
+                    <i class="fa-solid fa-file-invoice text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-extrabold tracking-tight text-slate-900">Azky Studio <span class="text-indigo-600">(NOTA)</span></span>
+                    <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs font-semibold bg-indigo-50 text-indigo-700 rounded-full">Demo Version 1.0</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="text-right hidden md:block">
+                    <p class="text-xs text-slate-400">Total Transaksi Hari Ini</p>
+                    <p class="text-sm font-bold text-slate-700" id="statTodayTotal">Rp 0</p>
+                </div>
+                <div class="h-8 w-px bg-slate-200 hidden md:block"></div>
+                <button onclick="resetAllData()" class="text-slate-500 hover:text-red-600 p-2 rounded-lg hover:bg-slate-100 transition duration-150" title="Reset Semua Data">
+                    <i class="fa-solid fa-arrow-rotate-left"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- LEFT PANEL: Inputs & Management (7 Columns) -->
+            <section class="lg:col-span-7 space-y-6 no-print">
+                
+                <!-- Quick Navigation Tabs for the Left Panel -->
+                <div class="bg-white p-1 rounded-xl border border-slate-200 flex space-x-1 shadow-sm">
+                    <button onclick="switchTab('tab-buat')" id="btn-tab-buat" class="tab-btn flex-1 py-2.5 px-3 rounded-lg text-sm font-medium flex items-center justify-center space-x-2 transition-all duration-150 bg-indigo-600 text-white">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>Buat Nota</span>
+                    </button>
+                    <button onclick="switchTab('tab-katalog')" id="btn-tab-katalog" class="tab-btn flex-1 py-2.5 px-3 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 flex items-center justify-center space-x-2 transition-all duration-150">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                        <span>Katalog Barang</span>
+                    </button>
+                    <button onclick="switchTab('tab-riwayat')" id="btn-tab-riwayat" class="tab-btn flex-1 py-2.5 px-3 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 flex items-center justify-center space-x-2 transition-all duration-150">
+                        <i class="fa-solid fa-history"></i>
+                        <span>Riwayat Nota</span>
+                    </button>
+                </div>
+
+                <!-- SUB-TAB 1: BUAT NOTA -->
+                <div id="tab-buat" class="tab-content space-y-6">
+                    <!-- Pengaturan Profil Toko (Collapsible Settings) -->
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                        <button onclick="toggleStoreSettings()" class="w-full flex items-center justify-between text-left focus:outline-none">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-store text-indigo-500"></i>
+                                <h2 class="text-base font-semibold text-slate-900">Pengaturan Profil Toko</h2>
+                            </div>
+                            <i id="storeSettingsIcon" class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-200"></i>
+                        </button>
+                        <div id="storeSettingsContent" class="hidden mt-4 pt-3 border-t border-slate-100 space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Logo Toko (Kustom)</label>
+                                    <div class="flex items-center space-x-3 bg-slate-50 border border-slate-200 rounded-xl p-3">
+                                        <div class="w-12 h-12 bg-white rounded-lg border border-slate-200 flex items-center justify-center overflow-hidden" id="logoPreviewContainer">
+                                            <i class="fa-solid fa-store text-slate-400 text-lg" id="logoPlaceholderIcon"></i>
+                                            <img id="logoPreviewImg" class="w-full h-full object-contain hidden" alt="Logo Preview">
+                                        </div>
+                                        <div class="flex-grow">
+                                            <input type="file" id="storeLogoInput" accept="image/*" onchange="handleLogoUpload(this)" class="hidden">
+                                            <button onclick="document.getElementById('storeLogoInput').click()" class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-semibold py-1.5 px-3 rounded-lg transition">
+                                                <i class="fa-solid fa-upload mr-1"></i> Pilih Gambar
+                                            </button>
+                                            <button onclick="removeStoreLogo()" id="btnRemoveLogo" class="hidden ml-2 text-rose-600 hover:text-rose-800 text-xs font-semibold py-1.5 px-2 transition">
+                                                <i class="fa-solid fa-trash-can mr-1"></i> Hapus
+                                            </button>
+                                            <p class="text-[10px] text-slate-400 mt-1">Format rekomendasi: PNG/JPG persegi transparan (Maks. 500KB)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Nama Toko</label>
+                                    <input type="text" id="storeNameInput" oninput="updateStoreProfile()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" value="AZKY STUDIO">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">No. Telepon</label>
+                                    <input type="text" id="storePhoneInput" oninput="updateStoreProfile()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" value="0812-3456-7890">
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Alamat Toko</label>
+                                    <input type="text" id="storeAddressInput" oninput="updateStoreProfile()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" value="Jl. Pembangunan Ekonomi No. 45, Jakarta Selatan">
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Email Toko</label>
+                                    <input type="email" id="storeEmailInput" oninput="updateStoreProfile()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" value="halo@notakita.com">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informasi Nota & Pelanggan -->
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                        <div class="flex items-center space-x-2 mb-4 border-b border-slate-100 pb-3">
+                            <i class="fa-solid fa-user-tag text-indigo-500"></i>
+                            <h2 class="text-base font-semibold text-slate-900">1. Informasi Transaksi</h2>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Nama Pelanggan</label>
+                                <input type="text" id="customerName" oninput="updateReceipt()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" placeholder="NAMA">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Nomor Pelanggan</label>
+                                <input type="text" id="customerPhone" oninput="updateReceipt()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" placeholder="NOMOR">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Nomor Nota / Invoice</label>
+                                <div class="relative">
+                                    <input type="text" id="receiptNumber" oninput="updateReceipt()" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" placeholder="INV-20260001">
+                                    <button onclick="generateRandomInvoiceNum()" class="absolute right-2 top-2 text-indigo-500 hover:text-indigo-700 p-1 rounded-md transition" title="Acak Nomor">
+                                        <i class="fa-solid fa-shuffle"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Tanggal Nota</label>
+                                <input type="date" id="receiptDate" oninput="updateReceipt()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Metode Pembayaran</label>
+                                <select id="paymentMethod" onchange="updateReceipt()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+                                    <option value="Tunai">Tunai / Cash</option>
+                                    <option value="Transfer Bank">Transfer Bank</option>
+                                    <option value="QRIS">QRIS</option>
+                                    <option value="Kartu Debit/Kredit">Kartu Debit/Kredit</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Entry Barang -->
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-cart-flatbed text-indigo-500"></i>
+                                <h2 class="text-base font-semibold text-slate-900">2. Input Barang</h2>
+                            </div>
+                            <span class="text-xs text-indigo-600 font-medium bg-indigo-50 px-2 py-1 rounded-md">Pilih barang katalog atau buat kustom</span>
+                        </div>
+
+                        <!-- Baris Tambah Barang Cepat -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 mb-6">
+                            <!-- Dropdown Katalog Cepat / Manual -->
+                            <div class="md:col-span-5">
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Cari / Pilih Dari Katalog</label>
+                                <select id="catalogSelect" onchange="selectCatalogItem()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+                                    <option value="">-- Ketik Nama atau Pilih Barang --</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-4">
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Nama Barang Manual</label>
+                                <input type="text" id="manualItemName" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" placeholder="Nama barang baru">
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Harga Satuan</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2.5 text-xs text-slate-400 font-medium">Rp</span>
+                                    <input type="number" id="manualItemPrice" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-2 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" placeholder="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1 mb-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Jumlah (Kuantitas)</label>
+                                <div class="flex items-center">
+                                    <button type="button" onclick="adjustManualQty(-1)" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2.5 rounded-l-xl border border-r-0 border-slate-200 transition">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+                                    <input type="number" id="manualItemQty" class="w-full bg-slate-50 border-y border-slate-200 text-center py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" value="1" min="1">
+                                    <button type="button" onclick="adjustManualQty(1)" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2.5 rounded-r-xl border border-l-0 border-slate-200 transition">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-end">
+                                <button onclick="addItemToInvoice()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl shadow-md shadow-indigo-100 transition duration-150 flex items-center justify-center space-x-2">
+                                    <i class="fa-solid fa-circle-plus"></i>
+                                    <span>Masukkan ke Nota</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daftar Barang yang Dimasukkan -->
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-list-check text-indigo-500"></i>
+                                <h2 class="text-base font-semibold text-slate-900">3. Rincian Barang di Nota</h2>
+                            </div>
+                            <button onclick="clearInvoiceItems()" class="text-xs text-red-600 hover:text-red-800 font-medium hover:underline flex items-center space-x-1">
+                                <i class="fa-solid fa-trash-can"></i>
+                                <span>Kosongkan Nota</span>
+                            </button>
+                        </div>
+
+                        <!-- Table layout for items on desktop, list layout on mobile -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead>
+                                    <tr class="text-slate-400 text-xs border-b border-slate-100 uppercase tracking-wider">
+                                        <th class="py-3 px-1">Nama Barang</th>
+                                        <th class="py-3 px-1 text-center" style="width: 100px;">Jumlah</th>
+                                        <th class="py-3 px-1 text-right" style="width: 120px;">Harga Satuan</th>
+                                        <th class="py-3 px-1 text-right" style="width: 120px;">Total</th>
+                                        <th class="py-3 px-1 text-center" style="width: 50px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activeInvoiceItemsTable" class="divide-y divide-slate-100">
+                                    <!-- Dynamic Rows here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Empty State if no items added -->
+                        <div id="emptyInvoiceState" class="text-center py-8 text-slate-400">
+                            <i class="fa-solid fa-basket-shopping text-3xl mb-2 text-slate-300"></i>
+                            <p class="text-sm">Belum ada barang di dalam nota ini.</p>
+                        </div>
+                    </div>
+
+                    <!-- Diskon, Pajak & Pembayaran -->
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                        <div class="flex items-center space-x-2 mb-4 border-b border-slate-100 pb-3">
+                            <i class="fa-solid fa-tags text-indigo-500"></i>
+                            <h2 class="text-base font-semibold text-slate-900">4. Diskon, Pajak & Pembayaran</h2>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Diskon (%)</label>
+                                <input type="number" id="invoiceDiscount" oninput="updateReceipt()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" value="0" min="0" max="100">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Pajak / PPN (%)</label>
+                                <input type="number" id="invoiceTax" oninput="updateReceipt()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" value="0" min="0" max="100">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Jumlah Dibayar (Uang Pas)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2.5 text-xs text-slate-400 font-medium">Rp</span>
+                                    <input type="number" id="cashAmountPaid" oninput="updateReceipt()" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-2 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" value="0" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick cash helper buttons -->
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <span class="text-xs text-slate-400 self-center">Uang Cepat:</span>
+                            <button onclick="applyQuickCash(10000)" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs py-1 px-2.5 rounded-lg transition">Rp 10k</button>
+                            <button onclick="applyQuickCash(20000)" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs py-1 px-2.5 rounded-lg transition">Rp 20k</button>
+                            <button onclick="applyQuickCash(50000)" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs py-1 px-2.5 rounded-lg transition">Rp 50k</button>
+                            <button onclick="applyQuickCash(100000)" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs py-1 px-2.5 rounded-lg transition">Rp 100k</button>
+                            <button onclick="applyQuickCash('pas')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs py-1 px-2.5 rounded-lg font-medium transition">Uang Pas</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-TAB 2: ATUR KATALOG BARANG -->
+                <div id="tab-katalog" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                        <div class="flex items-center space-x-2 mb-4 border-b border-slate-100 pb-3">
+                            <i class="fa-solid fa-box text-indigo-500"></i>
+                            <h2 class="text-base font-semibold text-slate-900">Tambah Barang ke Katalog</h2>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Nama Barang Baru</label>
+                                <input type="text" id="newCatItemName" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" placeholder="Contoh: Kertas A4 Sinar Dunia">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Harga Barang Default</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2.5 text-xs text-slate-400 font-medium">Rp</span>
+                                    <input type="number" id="newCatItemPrice" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-2 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition" placeholder="0">
+                                </div>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <button onclick="addNewCatalogItem()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl shadow-md transition duration-150 flex items-center justify-center space-x-2">
+                                    <i class="fa-solid fa-plus"></i>
+                                    <span>Simpan ke Katalog</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- List Katalog -->
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                            <h2 class="text-base font-semibold text-slate-900">Daftar Katalog Saat Ini</h2>
+                            <span id="catalogCount" class="text-xs text-indigo-600 font-bold bg-indigo-50 px-2 py-1 rounded-full">0 Barang</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead>
+                                    <tr class="text-slate-400 text-xs border-b border-slate-100 uppercase tracking-wider">
+                                        <th class="py-3 px-2">Nama Barang</th>
+                                        <th class="py-3 px-2 text-right">Harga Satuan</th>
+                                        <th class="py-3 px-2 text-center" style="width: 80px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="catalogListTable" class="divide-y divide-slate-100">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-TAB 3: RIWAYAT NOTA TERKOMPILASI -->
+                <div id="tab-riwayat" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-history text-indigo-500"></i>
+                                <h2 class="text-base font-semibold text-slate-900">Riwayat Transaksi</h2>
+                            </div>
+                            <button onclick="clearAllHistory()" class="text-xs text-red-600 hover:text-red-800 font-semibold hover:underline flex items-center space-x-1">
+                                <i class="fa-solid fa-eraser"></i>
+                                <span>Hapus Semua Riwayat</span>
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead>
+                                    <tr class="text-slate-400 text-xs border-b border-slate-100 uppercase tracking-wider">
+                                        <th class="py-3 px-2">Tanggal</th>
+                                        <th class="py-3 px-2">No. Nota</th>
+                                        <th class="py-3 px-2">Pelanggan</th>
+                                        <th class="py-3 px-2 text-right">Grand Total</th>
+                                        <th class="py-3 px-2 text-center" style="width: 100px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyListTable" class="divide-y divide-slate-100">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="emptyHistoryState" class="text-center py-8 text-slate-400 hidden">
+                            <i class="fa-solid fa-folder-open text-3xl mb-2 text-slate-300"></i>
+                            <p class="text-sm">Belum ada riwayat nota yang tersimpan.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- RIGHT PANEL: Live Invoice Preview (5 Columns) -->
+            <section class="lg:col-span-5 space-y-4">
+                
+                <div class="flex items-center justify-between no-print px-1">
+                    <span class="text-sm font-semibold text-slate-500 flex items-center space-x-1">
+                        <i class="fa-solid fa-eye text-emerald-500 animate-pulse"></i>
+                        <span>Preview Nota Kertas</span>
+                    </span>
+                    <div class="flex space-x-2">
+                        <button onclick="saveInvoiceToHistory()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-1.5 px-3 rounded-lg shadow-sm transition duration-150 flex items-center space-x-1">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Simpan Transaksi</span>
+                        </button>
+                        <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-1.5 px-3 rounded-lg shadow-sm transition duration-150 flex items-center space-x-1">
+                            <i class="fa-solid fa-print"></i>
+                            <span>Cetak Nota</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Paper Invoice Container -->
+                <div id="printArea" class="bg-white rounded-xl shadow-xl border border-slate-200 p-8 text-slate-800 relative mx-auto max-w-md md:max-w-none transition-all duration-300">
+                    
+                    <!-- Store Brand Header -->
+                    <div class="text-center border-b-2 border-dashed border-slate-200 pb-5">
+                        <div class="flex justify-center mb-3">
+                            <div id="receiptLogoWrapper" class="w-14 h-14 flex items-center justify-center overflow-hidden">
+                                <i class="fa-solid fa-store text-indigo-600 text-3xl" id="recDefaultLogo"></i>
+                                <img id="recCustomLogo" class="max-w-full max-h-full object-contain hidden" alt="Logo Toko">
+                            </div>
+                        </div>
+                        <h1 id="recStoreName" class="text-xl font-extrabold text-slate-900 tracking-tight">AZKY STUDIO</h1>
+                        <p id="recStoreAddress" class="text-xs text-slate-500 mt-1">Jl. Pembangunan Ekonomi No. 45, Jakarta Selatan</p>
+                        <p id="recStoreContact" class="text-xs text-slate-400">Telp: 0812-3456-7890 | Email: halo@notakita.com</p>
+                    </div>
+
+                    <!-- Invoice Metadata info -->
+                    <div class="grid grid-cols-2 gap-2 text-xs py-5 border-b border-slate-100">
+                        <div>
+                            <span class="text-slate-400 block uppercase font-medium tracking-wider">INFORMASI PELANGGANG</span>
+                            <span id="recClientName" class="font-bold text-slate-700 block mt-0.5">NAMA</span>
+                            <span id="recClientPhone" class="text-slate-500 block text-[11px] mt-0.5">NOMOR</span>
+                        </div>
+                        <div class="text-right">
+                            <span id="recInvoiceNum" class="font-bold text-indigo-600 block mb-0.5">INV-20260001</span>
+                            <span id="recDate" class="text-slate-500 block">06/06/2026</span>
+                            <span id="recPaymentMethod" class="inline-block mt-1 px-1.5 py-0.5 bg-slate-100 rounded text-[10px] text-slate-600 font-bold uppercase tracking-wider">TUNAI</span>
+                        </div>
+                    </div>
+
+                    <!-- Invoice Items Table Inside Paper -->
+                    <div class="py-5">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="text-slate-400 border-b border-slate-200 font-semibold uppercase tracking-wider text-[10px]">
+                                    <th class="text-left pb-2">Deskripsi Barang</th>
+                                    <th class="text-center pb-2" style="width: 50px;">Qty</th>
+                                    <th class="text-right pb-2" style="width: 100px;">Harga</th>
+                                    <th class="text-right pb-2" style="width: 100px;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recItemsBody" class="divide-y divide-slate-100">
+                                <!-- Dynamic Items Preview -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Calculation Totals Section -->
+                    <div class="border-t border-slate-200 pt-4 space-y-1.5 text-xs">
+                        <div class="flex justify-between text-slate-500">
+                            <span>Subtotal</span>
+                            <span id="recSubtotal">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between text-rose-500">
+                            <span>Diskon (<span id="recDiscountPct">0</span>%)</span>
+                            <span id="recDiscountAmt">-Rp 0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-500">
+                            <span>PPN (<span id="recTaxPct">0</span>%)</span>
+                            <span id="recTaxAmt">+Rp 0</span>
+                        </div>
+                        <div class="flex justify-between text-base font-extrabold text-slate-950 border-t border-dashed border-slate-200 pt-3">
+                            <span>Grand Total</span>
+                            <span id="recGrandTotal" class="text-indigo-600">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-500 pt-2">
+                            <span>Jumlah Bayar</span>
+                            <span id="recAmountPaid">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between font-bold text-slate-700">
+                            <span>Kembalian</span>
+                            <span id="recChangeDue">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <!-- Footer Note inside Receipt -->
+                    <div class="text-center border-t-2 border-dashed border-slate-200 mt-6 pt-5">
+                        <p class="text-[11px] font-semibold text-slate-700">Terima Kasih Atas Kunjungan Anda!</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Barang yang sudah dibeli tidak dapat ditukar kembali.</p>
+                        <p class="text-[9px] text-slate-300 mt-3 font-mono">Powered by Azky Studio</p>
+                    </div>
+
+                    <!-- Ornamental Cut Marks (Paper Mockup Visual Only) -->
+                    <div class="absolute -bottom-2 left-0 right-0 h-4 bg-slate-50 flex items-center justify-around overflow-hidden no-print">
+                        <div class="w-3 h-3 bg-white border-t border-r border-slate-200 rotate-45 transform translate-y-2"></div>
+                        <div class="w-3 h-3 bg-white border-t border-r border-slate-200 rotate-45 transform translate-y-2"></div>
+                        <div class="w-3 h-3 bg-white border-t border-r border-slate-200 rotate-45 transform translate-y-2"></div>
+                        <div class="w-3 h-3 bg-white border-t border-r border-slate-200 rotate-45 transform translate-y-2"></div>
+                        <div class="w-3 h-3 bg-white border-t border-r border-slate-200 rotate-45 transform translate-y-2"></div>
+                        <div class="w-3 h-3 bg-white border-t border-r border-slate-200 rotate-45 transform translate-y-2"></div>
+                        <div class="w-3 h-3 bg-white border-t border-r border-slate-200 rotate-45 transform translate-y-2"></div>
+                        <div class="w-3 h-3 bg-white border-t border-r border-slate-200 rotate-45 transform translate-y-2"></div>
+                    </div>
+
+                </div>
+
+                <!-- Print Note/Tips -->
+                <div class="bg-indigo-50 rounded-xl p-4 text-xs text-indigo-700 border border-indigo-100 no-print flex items-start space-x-2">
+                    <i class="fa-solid fa-circle-info mt-0.5"></i>
+                    <div>
+                        <p class="font-bold mb-1">Tips Mencetak:</p>
+                        <p class="text-indigo-600 leading-relaxed">Saat jendela print browser muncul, aktifkan opsi <strong>"Sembunyikan Header/Footer"</strong> dan nyalakan <strong>"Grafis Latar Belakang (Background Graphics)"</strong> agar hasil cetak kertas nota Anda sempurna.</p>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <!-- TOAST POPUP NOTIFICATION -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-semibold py-3 px-5 rounded-xl shadow-2xl flex items-center space-x-2.5 opacity-0 pointer-events-none transition-all duration-300 transform translate-y-5">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMessage">Barang berhasil ditambahkan ke nota!</span>
+    </div>
+
+    <script>
+        // --- DATA STATE DECLARATION ---
+        let catalog = [];
+        let invoiceItems = [];
+        let invoiceHistory = [];
+        let storeLogoBase64 = '';
+
+        // --- DUMMY INITIAL DATA ---
+        const defaultCatalog = [
+            { id: 'cat-1', name: 'Kopi Susu Gula Aren', price: 18000 },
+            { id: 'cat-2', name: 'Roti Bakar Cokelat Keju', price: 22000 },
+            { id: 'cat-3', name: 'Teh Manis Dingin Jumbo', price: 6000 },
+            { id: 'cat-4', name: 'Indomie Goreng Double Telur', price: 15000 },
+            { id: 'cat-5', name: 'Paket Nasi Ayam Geprek', price: 25000 }
+        ];
+
+        // --- APP LIFE CYCLE INITIALIZATION ---
+        window.onload = function() {
+            // Set current date in input
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('receiptDate').value = today;
+
+            // Generate first invoice number
+            generateRandomInvoiceNum();
+
+            // Load data from LocalStorage or initialize with defaults
+            loadCatalogFromStorage();
+            loadHistoryFromStorage();
+            loadStoreProfileFromStorage();
+            
+            // Sync UI components
+            renderCatalogDropdown();
+            renderCatalogList();
+            renderInvoiceItems();
+            renderHistoryList();
+            updateStats();
+        }
+
+        // --- HELPERS: LocalStorage Managers ---
+        function loadCatalogFromStorage() {
+            const stored = localStorage.getItem('notakita_catalog');
+            if (stored) {
+                catalog = JSON.parse(stored);
+            } else {
+                catalog = [...defaultCatalog];
+                saveCatalogToStorage();
+            }
+        }
+
+        function saveCatalogToStorage() {
+            localStorage.setItem('notakita_catalog', JSON.stringify(catalog));
+        }
+
+        function loadHistoryFromStorage() {
+            const stored = localStorage.getItem('notakita_history');
+            if (stored) {
+                invoiceHistory = JSON.parse(stored);
+            } else {
+                invoiceHistory = [];
+            }
+        }
+
+        function saveHistoryToStorage() {
+            localStorage.setItem('notakita_history', JSON.stringify(invoiceHistory));
+        }
+
+        // --- HELPERS: Store Profile Managers ---
+        function loadStoreProfileFromStorage() {
+            const stored = localStorage.getItem('notakita_store_profile');
+            if (stored) {
+                const profile = JSON.parse(stored);
+                document.getElementById('storeNameInput').value = profile.name || 'AZKY STUDIO';
+                document.getElementById('storeAddressInput').value = profile.address || 'Jl. Pembangunan Ekonomi No. 45, Jakarta Selatan';
+                document.getElementById('storePhoneInput').value = profile.phone || '0812-3456-7890';
+                document.getElementById('storeEmailInput').value = profile.email || 'halo@notakita.com';
+                storeLogoBase64 = profile.logo || '';
+            } else {
+                storeLogoBase64 = '';
+            }
+            updateStoreProfile();
+        }
+
+        function updateStoreProfile() {
+            const name = document.getElementById('storeNameInput').value.trim() || 'AZKY STUDIO';
+            const address = document.getElementById('storeAddressInput').value.trim() || 'Jl. Pembangunan Ekonomi No. 45, Jakarta Selatan';
+            const phone = document.getElementById('storePhoneInput').value.trim() || '0812-3456-7890';
+            const email = document.getElementById('storeEmailInput').value.trim() || 'halo@notakita.com';
+
+            // Dapatkan referensi elemen preview logo
+            const logoPreviewImg = document.getElementById('logoPreviewImg');
+            const logoPlaceholderIcon = document.getElementById('logoPlaceholderIcon');
+            const btnRemoveLogo = document.getElementById('btnRemoveLogo');
+            const recCustomLogo = document.getElementById('recCustomLogo');
+            const recDefaultLogo = document.getElementById('recDefaultLogo');
+
+            // Set visual logo berdasarkan ketersediaan base64
+            if (storeLogoBase64) {
+                logoPreviewImg.src = storeLogoBase64;
+                logoPreviewImg.classList.remove('hidden');
+                logoPlaceholderIcon.classList.add('hidden');
+                btnRemoveLogo.classList.remove('hidden');
+
+                recCustomLogo.src = storeLogoBase64;
+                recCustomLogo.classList.remove('hidden');
+                recDefaultLogo.classList.add('hidden');
+            } else {
+                logoPreviewImg.src = '';
+                logoPreviewImg.classList.add('hidden');
+                logoPlaceholderIcon.classList.remove('hidden');
+                btnRemoveLogo.classList.add('hidden');
+
+                recCustomLogo.src = '';
+                recCustomLogo.classList.add('hidden');
+                recDefaultLogo.classList.remove('hidden');
+            }
+
+            // Update real-time paper invoice preview
+            document.getElementById('recStoreName').innerText = name;
+            document.getElementById('recStoreAddress').innerText = address;
+            document.getElementById('recStoreContact').innerText = `Telp: ${phone} | Email: ${email}`;
+
+            // Save to LocalStorage
+            const profile = { name, address, phone, email, logo: storeLogoBase64 };
+            localStorage.setItem('notakita_store_profile', JSON.stringify(profile));
+        }
+
+        function handleLogoUpload(input) {
+            const file = input.files[0];
+            if (file) {
+                if (file.size > 500000) { // Limit 500KB untuk menjaga batas kapasitas localStorage
+                    showToast('Ukuran gambar terlalu besar! Maksimal 500KB.', 'error');
+                    input.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    storeLogoBase64 = e.target.result;
+                    updateStoreProfile();
+                    showToast('Logo berhasil diunggah!', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeStoreLogo() {
+            storeLogoBase64 = '';
+            document.getElementById('storeLogoInput').value = '';
+            updateStoreProfile();
+            showToast('Logo kustom berhasil dihapus.', 'info');
+        }
+
+        function toggleStoreSettings() {
+            const content = document.getElementById('storeSettingsContent');
+            const icon = document.getElementById('storeSettingsIcon');
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                icon.classList.remove('rotate-180');
+            }
+        }
+
+        // --- HELPER: Formatting currency ---
+        function formatRupiah(number) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(number);
+        }
+
+        // --- TOAST NOTIFICATION UTILITY ---
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            const msg = document.getElementById('toastMessage');
+
+            msg.innerText = message;
+            
+            // Adjust styles based on type
+            if (type === 'success') {
+                icon.className = "fa-solid fa-circle-check text-emerald-400";
+            } else if (type === 'error') {
+                icon.className = "fa-solid fa-circle-xmark text-red-400";
+            } else if (type === 'info') {
+                icon.className = "fa-solid fa-circle-info text-blue-400";
+            }
+
+            // Animate In
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-5');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-5');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        }
+
+        // --- NAVIGATION TABS LOGIC ---
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            // Show target tab
+            document.getElementById(tabId).classList.remove('hidden');
+
+            // Reset tab button states
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn flex-1 py-2.5 px-3 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 flex items-center justify-center space-x-2 transition-all duration-150";
+            });
+
+            // Highlight active button
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = "tab-btn flex-1 py-2.5 px-3 rounded-lg text-sm font-medium flex items-center justify-center space-x-2 transition-all duration-150 bg-indigo-600 text-white shadow-md shadow-indigo-100";
+            }
+        }
+
+        // --- GENERATE INVOICE NUMBER ---
+        function generateRandomInvoiceNum() {
+            const dateStr = new Date().toISOString().slice(0,10).replace(/-/g,"");
+            const randomCode = Math.floor(1000 + Math.random() * 9000);
+            const generatedNum = `INV-${dateStr}-${randomCode}`;
+            document.getElementById('receiptNumber').value = generatedNum;
+            updateReceipt();
+        }
+
+        // --- STREAMING_CHUNK: Managing catalog interaction and selections ---
+        // --- MANAGE KATALOG BARANG FUNCTIONS ---
+        function renderCatalogDropdown() {
+            const dropdown = document.getElementById('catalogSelect');
+            dropdown.innerHTML = '<option value="">-- Ketik Nama atau Pilih Barang --</option>';
+            
+            catalog.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.innerText = `${item.name} (${formatRupiah(item.price)})`;
+                dropdown.appendChild(opt);
+            });
+        }
+
+        function renderCatalogList() {
+            const tableBody = document.getElementById('catalogListTable');
+            tableBody.innerHTML = '';
+
+            document.getElementById('catalogCount').innerText = `${catalog.length} Barang`;
+
+            if (catalog.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-slate-400">Belum ada barang di katalog. Silakan tambahkan barang di atas.</td></tr>`;
+                return;
+            }
+
+            catalog.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors duration-150";
+                tr.innerHTML = `
+                    <td class="py-3 px-2 font-medium text-slate-700">${item.name}</td>
+                    <td class="py-3 px-2 text-right font-mono">${formatRupiah(item.price)}</td>
+                    <td class="py-3 px-2 text-center">
+                        <button onclick="deleteCatalogItem('${item.id}')" class="text-slate-400 hover:text-red-600 p-1.5 rounded transition" title="Hapus dari Katalog">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function selectCatalogItem() {
+            const dropdown = document.getElementById('catalogSelect');
+            const selectedId = dropdown.value;
+            
+            if (selectedId) {
+                const item = catalog.find(i => i.id === selectedId);
+                if (item) {
+                    document.getElementById('manualItemName').value = item.name;
+                    document.getElementById('manualItemPrice').value = item.price;
+                }
+            } else {
+                document.getElementById('manualItemName').value = '';
+                document.getElementById('manualItemPrice').value = '';
+            }
+        }
+
+        function addNewCatalogItem() {
+            const name = document.getElementById('newCatItemName').value.trim();
+            const price = parseFloat(document.getElementById('newCatItemPrice').value);
+
+            if (!name || isNaN(price) || price < 0) {
+                showToast('Harap masukkan nama barang & harga default yang valid!', 'error');
+                return;
+            }
+
+            const newItem = {
+                id: 'cat-' + Date.now(),
+                name: name,
+                price: price
+            };
+
+            catalog.push(newItem);
+            saveCatalogToStorage();
+            renderCatalogDropdown();
+            renderCatalogList();
+            
+            // Reset fields
+            document.getElementById('newCatItemName').value = '';
+            document.getElementById('newCatItemPrice').value = '';
+            
+            showToast(`"${name}" berhasil disimpan ke katalog!`, 'success');
+        }
+
+        function deleteCatalogItem(id) {
+            const index = catalog.findIndex(item => item.id === id);
+            if (index !== -1) {
+                const itemName = catalog[index].name;
+                catalog.splice(index, 1);
+                saveCatalogToStorage();
+                renderCatalogDropdown();
+                renderCatalogList();
+                showToast(`"${itemName}" berhasil dihapus dari katalog!`, 'info');
+            }
+        }
+
+        // --- INVOICE MAKER FUNCTIONS ---
+        function adjustManualQty(amount) {
+            const input = document.getElementById('manualItemQty');
+            let val = parseInt(input.value) || 1;
+            val += amount;
+            if (val < 1) val = 1;
+            input.value = val;
+        }
+
+        function addItemToInvoice() {
+            const name = document.getElementById('manualItemName').value.trim();
+            const price = parseFloat(document.getElementById('manualItemPrice').value);
+            const qty = parseInt(document.getElementById('manualItemQty').value) || 1;
+
+            if (!name || isNaN(price) || price < 0) {
+                showToast('Harap pastikan Nama Barang dan Harga sudah diisi dengan benar.', 'error');
+                return;
+            }
+
+            // Check if item already exists in the current invoice, update qty instead if found
+            const existingItem = invoiceItems.find(item => item.name.toLowerCase() === name.toLowerCase());
+            if (existingItem) {
+                existingItem.qty += qty;
+                existingItem.total = existingItem.qty * existingItem.price;
+                showToast(`Kuantitas "${name}" diperbarui ke nota!`, 'success');
+            } else {
+                // Add brand new item in current invoice list
+                const newItem = {
+                    id: 'inv-' + Date.now(),
+                    name: name,
+                    price: price,
+                    qty: qty,
+                    total: qty * price
+                };
+                invoiceItems.push(newItem);
+                showToast(`"${name}" berhasil ditambahkan ke nota!`, 'success');
+            }
+
+            // Reset input fields
+            document.getElementById('manualItemName').value = '';
+            document.getElementById('manualItemPrice').value = '';
+            document.getElementById('manualItemQty').value = '1';
+            document.getElementById('catalogSelect').value = '';
+
+            renderInvoiceItems();
+            updateReceipt();
+        }
+
+        function removeInvoiceItem(id) {
+            invoiceItems = invoiceItems.filter(item => item.id !== id);
+            renderInvoiceItems();
+            updateReceipt();
+            showToast('Barang dihapus dari nota.', 'info');
+        }
+
+        function adjustInvoiceItemQty(id, newQty) {
+            newQty = parseInt(newQty);
+            if (isNaN(newQty) || newQty < 1) {
+                newQty = 1;
+            }
+            const item = invoiceItems.find(i => i.id === id);
+            if (item) {
+                item.qty = newQty;
+                item.total = item.qty * item.price;
+                renderInvoiceItems();
+                updateReceipt();
+            }
+        }
+
+        function adjustInvoiceItemPrice(id, newPrice) {
+            newPrice = parseFloat(newPrice);
+            if (isNaN(newPrice) || newPrice < 0) {
+                newPrice = 0;
+            }
+            const item = invoiceItems.find(i => i.id === id);
+            if (item) {
+                item.price = newPrice;
+                item.total = item.qty * item.price;
+                renderInvoiceItems();
+                updateReceipt();
+            }
+        }
+
+        function clearInvoiceItems() {
+            if (invoiceItems.length === 0) return;
+            invoiceItems = [];
+            renderInvoiceItems();
+            updateReceipt();
+            showToast('Semua isi nota dibersihkan.', 'info');
+        }
+
+        function applyQuickCash(amount) {
+            const subtotal = invoiceItems.reduce((acc, item) => acc + item.total, 0);
+            const discountPct = parseFloat(document.getElementById('invoiceDiscount').value) || 0;
+            const taxPct = parseFloat(document.getElementById('invoiceTax').value) || 0;
+            
+            const discAmt = subtotal * (discountPct / 100);
+            const taxable = subtotal - discAmt;
+            const taxAmt = taxable * (taxPct / 100);
+            const grandTotal = taxable + taxAmt;
+
+            if (amount === 'pas') {
+                document.getElementById('cashAmountPaid').value = Math.ceil(grandTotal);
+            } else {
+                document.getElementById('cashAmountPaid').value = amount;
+            }
+            updateReceipt();
+        }
+
+        // --- RENDERING ACTIVE WORKSPACE TABLES ---
+        function renderInvoiceItems() {
+            const tableBody = document.getElementById('activeInvoiceItemsTable');
+            const emptyState = document.getElementById('emptyInvoiceState');
+            
+            tableBody.innerHTML = '';
+
+            if (invoiceItems.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            invoiceItems.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors duration-150";
+                tr.innerHTML = `
+                    <td class="py-3 px-1">
+                        <div class="font-semibold text-slate-800">${item.name}</div>
+                    </td>
+                    <td class="py-3 px-1 text-center">
+                        <input type="number" value="${item.qty}" min="1" onchange="adjustInvoiceItemQty('${item.id}', this.value)" class="w-14 text-center border border-slate-200 rounded px-1 py-1 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                    </td>
+                    <td class="py-3 px-1 text-right">
+                        <div class="relative inline-block w-28">
+                            <span class="absolute left-1 top-1.5 text-[10px] text-slate-400">Rp</span>
+                            <input type="number" value="${item.price}" min="0" onchange="adjustInvoiceItemPrice('${item.id}', this.value)" class="w-full text-right border border-slate-200 rounded pl-5 pr-1 py-1 text-xs font-mono focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                        </div>
+                    </td>
+                    <td class="py-3 px-1 text-right font-mono font-bold text-slate-700">${formatRupiah(item.total)}</td>
+                    <td class="py-3 px-1 text-center">
+                        <button onclick="removeInvoiceItem('${item.id}')" class="text-slate-400 hover:text-red-500 p-1.5 rounded transition" title="Hapus">
+                            <i class="fa-solid fa-square-minus"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // --- LIVE PREVIEW RECEIPT RENDERING & CALCULATIONS ---
+        function updateReceipt() {
+            // Read inputs
+            const clientName = document.getElementById('customerName').value.trim() || 'NAMA';
+            const clientPhone = document.getElementById('customerPhone').value.trim() || 'NOMOR';
+            const invoiceNum = document.getElementById('receiptNumber').value.trim() || 'INV-UNSPECIFIED';
+            const invoiceDate = document.getElementById('receiptDate').value || new Date().toISOString().split('T')[0];
+            const payMethod = document.getElementById('paymentMethod').value;
+            
+            const discountPct = parseFloat(document.getElementById('invoiceDiscount').value) || 0;
+            const taxPct = parseFloat(document.getElementById('invoiceTax').value) || 0;
+            const amountPaid = parseFloat(document.getElementById('cashAmountPaid').value) || 0;
+
+            // Formating Date to Indonesian readable format (e.g. 06 Juni 2026)
+            let formattedDate = invoiceDate;
+            try {
+                const parts = invoiceDate.split('-');
+                if(parts.length === 3) {
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                    formattedDate = `${parts[2]} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
+                }
+            } catch (e) {
+                formattedDate = invoiceDate;
+            }
+
+            // Update header info inside receipt card
+            document.getElementById('recClientName').innerText = clientName;
+            document.getElementById('recClientPhone').innerText = clientPhone;
+            document.getElementById('recInvoiceNum').innerText = invoiceNum;
+            document.getElementById('recDate').innerText = formattedDate;
+            document.getElementById('recPaymentMethod').innerText = payMethod;
+
+            // Calculate numbers
+            const subtotal = invoiceItems.reduce((acc, item) => acc + item.total, 0);
+            const discAmt = subtotal * (discountPct / 100);
+            const taxable = subtotal - discAmt;
+            const taxAmt = taxable * (taxPct / 100);
+            const grandTotal = taxable + taxAmt;
+            const changeDue = Math.max(0, amountPaid - grandTotal);
+
+            // Render calculations inside receipt card
+            document.getElementById('recSubtotal').innerText = formatRupiah(subtotal);
+            document.getElementById('recDiscountPct').innerText = discountPct;
+            document.getElementById('recDiscountAmt').innerText = `- ${formatRupiah(discAmt)}`;
+            document.getElementById('recTaxPct').innerText = taxPct;
+            document.getElementById('recTaxAmt').innerText = `+ ${formatRupiah(taxAmt)}`;
+            document.getElementById('recGrandTotal').innerText = formatRupiah(grandTotal);
+            document.getElementById('recAmountPaid').innerText = formatRupiah(amountPaid);
+            document.getElementById('recChangeDue').innerText = formatRupiah(amountPaid > 0 ? changeDue : 0);
+
+            // Populate Items Table inside receipt card
+            const recItemsBody = document.getElementById('recItemsBody');
+            recItemsBody.innerHTML = '';
+
+            if (invoiceItems.length === 0) {
+                recItemsBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center py-8 text-slate-300 italic">Belum ada barang di nota.</td>
+                    </tr>
+                `;
+            } else {
+                invoiceItems.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b border-slate-50";
+                    tr.innerHTML = `
+                        <td class="py-2.5 pr-1 font-medium text-slate-800">
+                            <div>${item.name}</div>
+                        </td>
+                        <td class="py-2.5 text-center text-slate-500 font-mono">${item.qty}</td>
+                        <td class="py-2.5 text-right text-slate-500 font-mono">${formatRupiah(item.price)}</td>
+                        <td class="py-2.5 text-right font-semibold text-slate-800 font-mono">${formatRupiah(item.total)}</td>
+                    `;
+                    recItemsBody.appendChild(tr);
+                });
+            }
+        }
+
+        // --- TRANSACTIONS HISTORY STORAGE & ACTIONS ---
+        function saveInvoiceToHistory() {
+            if (invoiceItems.length === 0) {
+                showToast('Gagal menyimpan. Tidak ada barang dalam nota saat ini!', 'error');
+                return;
+            }
+
+            const clientName = document.getElementById('customerName').value.trim() || 'NAMA';
+            const clientPhone = document.getElementById('customerPhone').value.trim() || 'NOMOR';
+            const invoiceNum = document.getElementById('receiptNumber').value.trim() || 'INV-' + Date.now();
+            const invoiceDate = document.getElementById('receiptDate').value || new Date().toISOString().split('T')[0];
+            const payMethod = document.getElementById('paymentMethod').value;
+            
+            const discountPct = parseFloat(document.getElementById('invoiceDiscount').value) || 0;
+            const taxPct = parseFloat(document.getElementById('invoiceTax').value) || 0;
+            const amountPaid = parseFloat(document.getElementById('cashAmountPaid').value) || 0;
+
+            const subtotal = invoiceItems.reduce((acc, item) => acc + item.total, 0);
+            const discAmt = subtotal * (discountPct / 100);
+            const taxable = subtotal - discAmt;
+            const taxAmt = taxable * (taxPct / 100);
+            const grandTotal = taxable + taxAmt;
+
+            // Check if invoice number is already in history to prevent duplicates
+            if (invoiceHistory.some(history => history.invoiceNum === invoiceNum)) {
+                showToast('Nomor nota sudah terdaftar dalam riwayat! Silakan ubah atau acak nomor.', 'error');
+                return;
+            }
+
+            const historyRecord = {
+                id: 'hist-' + Date.now(),
+                date: invoiceDate,
+                invoiceNum: invoiceNum,
+                clientName: clientName,
+                clientPhone: clientPhone,
+                items: [...invoiceItems],
+                paymentMethod: payMethod,
+                subtotal: subtotal,
+                discountPct: discountPct,
+                taxPct: taxPct,
+                grandTotal: grandTotal,
+                amountPaid: amountPaid
+            };
+
+            invoiceHistory.unshift(historyRecord); // Add to the top of list
+            saveHistoryToStorage();
+            
+            renderHistoryList();
+            updateStats();
+            
+            showToast(`Nota ${invoiceNum} berhasil disimpan ke Riwayat!`, 'success');
+
+            // Generate a brand new invoice number for next transaction
+            generateRandomInvoiceNum();
+        }
+
+        function deleteHistoryItem(id) {
+            invoiceHistory = invoiceHistory.filter(item => item.id !== id);
+            saveHistoryToStorage();
+            renderHistoryList();
+            updateStats();
+            showToast('Satu riwayat transaksi telah dihapus.', 'info');
+        }
+
+        function loadHistoryToWorkspace(id) {
+            const history = invoiceHistory.find(item => item.id === id);
+            if (history) {
+                // Populate workspace form controls with history record
+                document.getElementById('customerName').value = history.clientName === 'NAMA' ? '' : history.clientName;
+                document.getElementById('customerPhone').value = (history.clientPhone === 'NOMOR' || !history.clientPhone) ? '' : history.clientPhone;
+                document.getElementById('receiptNumber').value = history.invoiceNum;
+                document.getElementById('receiptDate').value = history.date;
+                document.getElementById('paymentMethod').value = history.paymentMethod;
+                document.getElementById('invoiceDiscount').value = history.discountPct;
+                document.getElementById('invoiceTax').value = history.taxPct;
+                document.getElementById('cashAmountPaid').value = history.amountPaid;
+
+                // Clone deep items
+                invoiceItems = JSON.parse(JSON.stringify(history.items));
+
+                renderInvoiceItems();
+                updateReceipt();
+                switchTab('tab-buat');
+
+                showToast(`Nota ${history.invoiceNum} berhasil dimuat kembali!`, 'info');
+            }
+        }
+
+        function renderHistoryList() {
+            const tableBody = document.getElementById('historyListTable');
+            const emptyState = document.getElementById('emptyHistoryState');
+
+            tableBody.innerHTML = '';
+
+            if (invoiceHistory.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            invoiceHistory.forEach(record => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors duration-150";
+                tr.innerHTML = `
+                    <td class="py-3 px-2 text-slate-600 text-xs">${record.date}</td>
+                    <td class="py-3 px-2 font-bold text-indigo-600">${record.invoiceNum}</td>
+                    <td class="py-3 px-2 text-slate-800 font-medium">${record.clientName}</td>
+                    <td class="py-3 px-2 text-right font-bold text-slate-900 font-mono">${formatRupiah(record.grandTotal)}</td>
+                    <td class="py-3 px-2 text-center flex items-center justify-center space-x-1.5">
+                        <button onclick="loadHistoryToWorkspace('${record.id}')" class="text-indigo-500 hover:text-indigo-700 p-1.5 rounded bg-indigo-50 hover:bg-indigo-100 transition" title="Buka & Edit">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </button>
+                        <button onclick="deleteHistoryItem('${record.id}')" class="text-rose-500 hover:text-rose-700 p-1.5 rounded bg-rose-50 hover:bg-rose-100 transition" title="Hapus Riwayat">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function updateStats() {
+            // Calculate sum of today's total inside history database
+            const today = new Date().toISOString().split('T')[0];
+            const sumToday = invoiceHistory
+                .filter(rec => rec.date === today)
+                .reduce((acc, rec) => acc + rec.grandTotal, 0);
+
+            document.getElementById('statTodayTotal').innerText = formatRupiah(sumToday);
+        }
+
+        function clearAllHistory() {
+            if (confirm("Apakah Anda yakin ingin menghapus seluruh riwayat nota? Tindakan ini tidak dapat dibatalkan.")) {
+                invoiceHistory = [];
+                saveHistoryToStorage();
+                renderHistoryList();
+                updateStats();
+                showToast('Seluruh riwayat transaksi telah dihapus.', 'info');
+            }
+        }
+
+        // --- MASTER DATA RESET ---
+        function resetAllData() {
+            if (confirm("Apakah Anda yakin ingin mereset aplikasi? Ini akan menghapus katalog buatan Anda dan seluruh riwayat transaksi kembali ke default.")) {
+                localStorage.removeItem('notakita_catalog');
+                localStorage.removeItem('notakita_history');
+                localStorage.removeItem('notakita_store_profile');
+                
+                // Re-init values
+                catalog = [...defaultCatalog];
+                invoiceItems = [];
+                invoiceHistory = [];
+                storeLogoBase64 = '';
+                
+                saveCatalogToStorage();
+                saveHistoryToStorage();
+                loadStoreProfileFromStorage();
+                
+                // Clear fields
+                document.getElementById('customerName').value = '';
+                document.getElementById('customerPhone').value = '';
+                document.getElementById('invoiceDiscount').value = '0';
+                document.getElementById('invoiceTax').value = '0';
+                document.getElementById('cashAmountPaid').value = '0';
+                document.getElementById('storeLogoInput').value = '';
+                
+                generateRandomInvoiceNum();
+                
+                // Render UI again
+                renderCatalogDropdown();
+                renderCatalogList();
+                renderInvoiceItems();
+                renderHistoryList();
+                updateStats();
+                
+                switchTab('tab-buat');
+                showToast('Aplikasi berhasil direset ke pengaturan bawaan.', 'info');
+            }
+        }
+    </script>
+</body>
+</html>
